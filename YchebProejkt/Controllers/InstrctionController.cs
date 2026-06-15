@@ -26,6 +26,9 @@ namespace YchebProejkt.Controllers
             return _db.Instructions;
         }
 
+
+
+
         // GET api/<InstructionController>/5
         //[HttpGet("{id}")]
         //public Instruction Get(int id)
@@ -33,6 +36,11 @@ namespace YchebProejkt.Controllers
 
         //    return _db.Instructions.FirstOrDefault(i => i.Id == id); 
         //}
+
+
+
+
+
         [HttpGet("search")]
         //Поиск с опциями
         public IActionResult Search(string? title, int? registryId, int? managementId, DateOnly? fromDate, DateOnly? toDate)
@@ -56,6 +64,10 @@ namespace YchebProejkt.Controllers
 
             return Ok(query.ToList());
         }
+
+
+
+
         // POST api/<InstructionController>
         [HttpPost]
         public void Post(CreateInstructionDto dto)
@@ -71,6 +83,9 @@ namespace YchebProejkt.Controllers
             _db.SaveChanges();
         }
 
+
+
+
         // PUT api/<InstructionController>/5
         [HttpPut("{id}")]
         public void Rename(int id, [FromBody]string newtitle)
@@ -82,6 +97,9 @@ namespace YchebProejkt.Controllers
             _db.SaveChanges();
 
         }
+
+
+
 
         // DELETE api/<InstructionController>/5
         //Для удаления инструкции вместе с файлом
@@ -103,6 +121,9 @@ namespace YchebProejkt.Controllers
 
             return Ok();
         }
+
+
+
 
         [HttpPost("upload")]
         //загружать файлы
@@ -133,6 +154,10 @@ namespace YchebProejkt.Controllers
 
             return Ok(instruction);
         }
+
+
+
+
         [HttpGet("download")]
         //скачивать файлы
         public async Task<IActionResult> Download(int instructionId)
@@ -145,5 +170,8 @@ namespace YchebProejkt.Controllers
 
             return PhysicalFile(instruction.FilePath, instruction.ContentType, instruction.Title);
         }
+
+
+
     }
 }

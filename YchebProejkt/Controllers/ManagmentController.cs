@@ -22,12 +22,19 @@ namespace YchebProejkt.Controllers
             return _db.Managements;
         }
 
+
+
+
         // GET api/<ManagmentController>/5
         //[HttpGet("{id}")]
         //public string Get(int id)
         //{
         //    return "value";
         //}
+
+
+
+
 
         // POST api/<ManagmentController>
         [HttpPost]
@@ -43,11 +50,17 @@ namespace YchebProejkt.Controllers
         }
 
 
+
+
         // PUT api/<ManagmentController>/5
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody]string value)
         //{
         //}
+
+
+
+
 
         // DELETE api/<ManagmentController>/5
         [HttpDelete("{id}")]
