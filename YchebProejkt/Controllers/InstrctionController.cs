@@ -69,19 +69,20 @@ namespace YchebProejkt.Controllers
 
 
         // POST api/<InstructionController>
-        [HttpPost]
-        public void Post(CreateInstructionDto dto)
-        {
-            var instruction = new Instruction
-            {
-                Title = dto.Title,
-                RegistryId = dto.RegistryId,
-                UploadDate = DateOnly.FromDateTime(DateTime.Now)
-            };
+        // тестовый пост, сейчас не используется
+        //[HttpPost]
+        //public void Post(CreateInstructionDto dto)
+        //{
+        //    var instruction = new Instruction
+        //    {
+        //        Title = dto.Title,
+        //        RegistryId = dto.RegistryId,
+        //        UploadDate = DateOnly.FromDateTime(DateTime.Now)
+        //    };
 
-            _db.Instructions.Add(instruction);
-            _db.SaveChanges();
-        }
+        //    _db.Instructions.Add(instruction);
+        //    _db.SaveChanges();
+        //}
 
 
 
@@ -126,7 +127,7 @@ namespace YchebProejkt.Controllers
 
 
         [HttpPost("upload")]
-        //загружать файлы
+        //загружать файлы (основной способ добавлять инструкции)
         public async Task<IActionResult> Upload(IFormFile file, int registryId, string title)
         {
             var directory = $"{Environment.CurrentDirectory}/Files";
@@ -143,7 +144,7 @@ namespace YchebProejkt.Controllers
             var instruction = new Instruction
             {
                 Title = title,
-                FilePath = fullFilePath,
+                FilePath = $"Files/{file.FileName}",
                 ContentType = file.ContentType,
                 UploadDate = DateOnly.FromDateTime(DateTime.Now),
                 RegistryId = registryId,
@@ -167,8 +168,9 @@ namespace YchebProejkt.Controllers
             if (!System.IO.File.Exists(instruction.FilePath)) return NotFound("Файла нет на диске");
 
             var bytes = await System.IO.File.ReadAllBytesAsync(instruction.FilePath);
+            var fullPath = Path.Combine(Environment.CurrentDirectory, instruction.FilePath);
 
-            return PhysicalFile(instruction.FilePath, instruction.ContentType, instruction.Title);
+            return PhysicalFile(fullPath, instruction.ContentType, instruction.Title);
         }
 
 
