@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Instruction Manager</title>
+</head>
+<body>
+    <h1>Instruction Manager</h1>
+
+    <h2>Upload Instruction</h2>
+
+    <input type="text" id="title" placeholder="Instruction title">
+    <input type="number" id="registryId" placeholder="Registry Id">
+    <input type="file" id="file">
+
+    <button onclick="upload()">Upload</button>
+
+    <hr>
+
+    <h2>Instructions</h2>
+
+    <button onclick="loadInstructions()">Refresh</button>
+
+    <ul id="instructions"></ul>
+
+    <script>
+        async function upload() {
+            const fileInput = document.getElementById("file");
+
+            if (fileInput.files.length === 0) {
+                alert("Choose a file");
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append("file", fileInput.files[0]);
+            formData.append("title", document.getElementById("title").value);
+            formData.append("registryId", document.getElementById("registryId").value);
+
+            const response = await fetch(
+                "/api/instruction/upload",
+                {
+                    method: "POST",
+                    body: formData
+                });
+
+            if (response.ok) {
+                alert("Uploaded!");
+                loadInstructions();
+            }
+            else {
+                alert("Upload failed");
+            }
+        }
+
+        async function loadInstructions() {
+            const response = await fetch("/api/instruction");
+
+            const instructions = await response.json();
+
+            const list = document.getElementById("instructions");
+
+            list.innerHTML = "";
+
+            instructions.forEach(i => {
+
+                const li = document.createElement("li");
+
+                li.innerHTML =
+                    `${i.title}
+                     <button onclick="downloadInstruction(${i.id})">
+                        Download
+                     </button>`;
+
+                list.appendChild(li);
+            });
+        }
+
+        function downloadInstruction(id) {
+            window.location =
+                `/api/instruction/download?instructionId=${id}`;
+        }
+
+        loadInstructions();
+    </script>
+</body>
+</html>
