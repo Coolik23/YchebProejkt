@@ -23,11 +23,11 @@ namespace YchebProejkt.Controllers
         }
 
         // GET api/<ManagmentController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        //[HttpGet("{id}")]
+        //public string Get(int id)
+        //{
+        //    return "value";
+        //}
 
         // POST api/<ManagmentController>
         [HttpPost]
@@ -44,15 +44,27 @@ namespace YchebProejkt.Controllers
 
 
         // PUT api/<ManagmentController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody]string value)
+        //{
+        //}
 
         // DELETE api/<ManagmentController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            var management = _db.Managements.FirstOrDefault(r => r.Id == id);
+
+            if (management == null)
+                return NotFound();
+
+            if (_db.Registries.Any(i => i.ManagementId == id))
+                return BadRequest("Управление содержит регистры");
+
+            _db.Managements.Remove(management);
+            _db.SaveChanges();
+
+            return Ok();
         }
     }
 }

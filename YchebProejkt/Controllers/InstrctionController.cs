@@ -19,6 +19,7 @@ namespace YchebProejkt.Controllers
             _db = db;
         }
         // GET: api/<InstructionController>
+        //для тестов
         [HttpGet]
         public IEnumerable<Instruction> Get()
         {
@@ -26,13 +27,14 @@ namespace YchebProejkt.Controllers
         }
 
         // GET api/<InstructionController>/5
-        [HttpGet("{id}")]
-        public Instruction Get(int id)
-        {
+        //[HttpGet("{id}")]
+        //public Instruction Get(int id)
+        //{
 
-            return _db.Instructions.FirstOrDefault(i => i.Id == id); 
-        }
+        //    return _db.Instructions.FirstOrDefault(i => i.Id == id); 
+        //}
         [HttpGet("search")]
+        //Поиск с опциями
         public IActionResult Search(string? title, int? registryId, int? managementId, DateOnly? fromDate, DateOnly? toDate)
         {
             var query = _db.Instructions.AsQueryable();
@@ -71,7 +73,7 @@ namespace YchebProejkt.Controllers
 
         // PUT api/<InstructionController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string newtitle)
+        public void Rename(int id, [FromBody]string newtitle)
         {
             var instruction = _db.Instructions.FirstOrDefault(i => i.Id == id);
             if (instruction == null)
@@ -82,12 +84,28 @@ namespace YchebProejkt.Controllers
         }
 
         // DELETE api/<InstructionController>/5
+        //Для удаления инструкции вместе с файлом
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            var instruction = _db.Instructions.FirstOrDefault(i => i.Id == id);
+
+            if (instruction == null)
+                return NotFound();
+
+            if (System.IO.File.Exists(instruction.FilePath))
+            {
+                System.IO.File.Delete(instruction.FilePath);
+            }
+
+            _db.Instructions.Remove(instruction);
+            _db.SaveChanges();
+
+            return Ok();
         }
 
         [HttpPost("upload")]
+        //загружать файлы
         public async Task<IActionResult> Upload(IFormFile file, int registryId, string title)
         {
             var directory = $"{Environment.CurrentDirectory}/Files";
@@ -116,11 +134,12 @@ namespace YchebProejkt.Controllers
             return Ok(instruction);
         }
         [HttpGet("download")]
+        //скачивать файлы
         public async Task<IActionResult> Download(int instructionId)
         {
             var instruction = await _db.Instructions.FirstOrDefaultAsync(i => i.Id == instructionId);
-            if (instruction == null) return NotFound("Instruction not found");
-            if (!System.IO.File.Exists(instruction.FilePath)) return NotFound("File missing on disk");
+            if (instruction == null) return NotFound("Инструкция не найдена");
+            if (!System.IO.File.Exists(instruction.FilePath)) return NotFound("Файла нет на диске");
 
             var bytes = await System.IO.File.ReadAllBytesAsync(instruction.FilePath);
 

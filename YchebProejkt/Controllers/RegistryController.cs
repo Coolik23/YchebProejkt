@@ -23,11 +23,11 @@ namespace YchebProejkt.Controllers
         }
 
         // GET api/<RegistryController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        //[HttpGet("{id}")]
+        //public string Get(int id)
+        //{
+        //    return "value";
+        //}
 
         // POST api/<RegistryController>
         [HttpPost]
@@ -44,15 +44,27 @@ namespace YchebProejkt.Controllers
         }
 
         // PUT api/<RegistryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody]string value)
+        //{
+        //}
 
         // DELETE api/<RegistryController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            var registry = _db.Registries.FirstOrDefault(r => r.Id == id);
+
+            if (registry == null)
+                return NotFound();
+
+            if (_db.Instructions.Any(i => i.RegistryId == id))
+                return BadRequest("В регистре есть инструкции");
+
+            _db.Registries.Remove(registry);
+            _db.SaveChanges();
+
+            return Ok();
         }
     }
 }
