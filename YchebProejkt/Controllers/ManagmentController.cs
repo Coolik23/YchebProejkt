@@ -24,21 +24,9 @@ namespace YchebProejkt.Controllers
 
 
 
-
-        // GET api/<ManagmentController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-
-
-
-
         // POST api/<ManagmentController>
         [HttpPost]
-        public void Post(CreateManagementDto dto)
+        public void Post([FromForm] CreateManagementDto dto)
         {
             var management = new Management
             {
@@ -53,12 +41,17 @@ namespace YchebProejkt.Controllers
 
 
         // PUT api/<ManagmentController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody]string value)
-        //{
-        //}
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] string newName)
+        {
+            var management = _db.Managements.FirstOrDefault(r => r.Id == id);
 
+            if (management == null)
+                return NotFound();
 
+            management.Name = newName;
+            return Ok();
+        }
 
 
 

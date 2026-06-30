@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using System.Data;
+using System.Security.Cryptography;
 using YchebProejkt.Data;
 using YchebProejkt.dto;
 
@@ -9,6 +10,7 @@ using YchebProejkt.dto;
 
 namespace YchebProejkt.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class InstructionController : ControllerBase
@@ -18,6 +20,17 @@ namespace YchebProejkt.Controllers
         {
             _db = db;
         }
+        
+        //вычисление хэша файла
+        private async Task<string> ComputeHash(IFormFile file)
+        {
+            using var sha = SHA256.Create();
+            using var stream = file.OpenReadStream();
+
+            var hash = await sha.ComputeHashAsync(stream);
+            return Convert.ToHexString(hash);
+        }
+
         // GET: api/<InstructionController>
         //для тестов
         [HttpGet]
@@ -127,27 +140,47 @@ namespace YchebProejkt.Controllers
 
 
         [HttpPost("upload")]
-        //загружать файлы (основной способ добавлять инструкции)
-        public async Task<IActionResult> Upload(IFormFile file, int registryId, string title)
+        public async Task<IActionResult> Upload([FromForm] CreateInstructionUploadDto dto)
         {
-            var directory = $"{Environment.CurrentDirectory}/Files";
-            if (!Directory.Exists(directory)) 
-            { 
+            if (dto.File == null || dto.File.Length == 0)
+                return BadRequest("Файла нет");
+
+            var hash = await ComputeHash(dto.File);
+
+            var directory = Path.Combine(Environment.CurrentDirectory, "Files");
+            if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-            }
-            var fullFilePath = $"{directory}/{file.FileName}";
-            if (!System.IO.File.Exists(fullFilePath))
+
+            // ищем уже существующий файл
+            var existing = _db.Instructions.FirstOrDefault(x => x.FileHash == hash);
+
+            string filePath;
+
+            if (existing != null)
             {
-                using var fileStream = System.IO.File.Create(fullFilePath);
-                await file.CopyToAsync(fileStream);
+                filePath = existing.FilePath;
             }
+            else
+            {
+                var fileName = $"{hash}_{dto.File.FileName}";
+                filePath = $"Files/{fileName}";
+
+                var fullFilePath = Path.Combine(directory, fileName);
+
+                using (var fileStream = System.IO.File.Create(fullFilePath))
+                {
+                    await dto.File.CopyToAsync(fileStream);
+                }
+            }
+
             var instruction = new Instruction
             {
-                Title = title,
-                FilePath = $"Files/{file.FileName}",
-                ContentType = file.ContentType,
+                Title = dto.Title,
+                FilePath = filePath,
+                ContentType = dto.File.ContentType,
                 UploadDate = DateOnly.FromDateTime(DateTime.Now),
-                RegistryId = registryId,
+                RegistryId = dto.RegistryId,
+                FileHash = hash
             };
 
             _db.Instructions.Add(instruction);
@@ -155,7 +188,6 @@ namespace YchebProejkt.Controllers
 
             return Ok(instruction);
         }
-
 
 
 

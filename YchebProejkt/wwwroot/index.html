@@ -2,87 +2,90 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Instruction Manager</title>
+    <title>Управление инструкциями</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Instruction Manager</h1>
 
-    <h2>Upload Instruction</h2>
+<body class="bg-dark text-white">
 
-    <input type="text" id="title" placeholder="Instruction title">
-    <input type="number" id="registryId" placeholder="Registry Id">
-    <input type="file" id="file">
+<h1 class="p-3 bg-primary text-white">Управление инструкциями</h1>
 
-    <button onclick="upload()">Upload</button>
+<div class="container-fluid">
+    <div class="row vh-100">
 
-    <hr>
+        <div class="col-3 bg-darker-dark-my p-3">
 
-    <h2>Instructions</h2>
+            <h4 class="mb-3">Разделы</h4>
 
-    <button onclick="loadInstructions()">Refresh</button>
+            <button class="btn btn-outline-light w-100 mb-2"
+                    onclick="setCatalogue('инструкции')">
+                Инструкции
+            </button>
 
-    <ul id="instructions"></ul>
+            <button class="btn btn-outline-light w-100 mb-2"
+                    onclick="setCatalogue('регистры')">
+                Регистры
+            </button>
 
-    <script>
-        async function upload() {
-            const fileInput = document.getElementById("file");
+            <button class="btn btn-outline-light w-100"
+                    onclick="setCatalogue('управления')">
+                Управления
+            </button>
 
-            if (fileInput.files.length === 0) {
-                alert("Choose a file");
-                return;
-            }
+        </div>
 
-            const formData = new FormData();
+        <div class="col-9 p-4">
 
-            formData.append("file", fileInput.files[0]);
-            formData.append("title", document.getElementById("title").value);
-            formData.append("registryId", document.getElementById("registryId").value);
+            <div class="card bg-primary text-white p-3 mb-4">
 
-            const response = await fetch(
-                "/api/instruction/upload",
-                {
-                    method: "POST",
-                    body: formData
-                });
+                <h4>Загрузить в: <span id="activeCatalogue">инструкции</span></h4>
 
-            if (response.ok) {
-                alert("Uploaded!");
-                loadInstructions();
-            }
-            else {
-                alert("Upload failed");
-            }
-        }
+                <input type="text" id="title" class="form-control mb-2" placeholder="Название">
 
-        async function loadInstructions() {
-            const response = await fetch("/api/instruction");
+                <div id="instructionFields">
+                    <select id="registrySelect" class="form-select mb-2">
+                        <option value="">Выберите регистр</option>
+                    </select>
+                    <input type="file" id="formFile" class="form-control mb-3">
+                </div>
 
-            const instructions = await response.json();
+                <div id="registryFields" style="display:none;">
+                    <select id="managementSelect" class="form-select mb-2">
+                        <option value="">Выберите управление</option>
+                    </select>
+                </div>
 
-            const list = document.getElementById("instructions");
+                <button onclick="upload()" id="uploadButton" class="btn btn-light w-100">
+                    Загрузить
+                </button>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4>В базе</h4>
+                <div id="searchForInstructions" class="d-flex gap-2 mb-2">
+                    <input id="searchTitle" class="form-control" placeholder="Поиск по названию">
 
-            list.innerHTML = "";
+                    <select id="registryFilter" class="form-select">
+                        <option value="">Все</option>
+                    </select>
 
-            instructions.forEach(i => {
+                    <button onclick="loadCurrentList()" class="btn btn-outline-light">
+                        Найти
+                    </button>
+                </div>
 
-                const li = document.createElement("li");
+                <button onclick="refresh()" class="btn btn-outline-light btn-sm">
+                    Обновить
+                </button>
+            </div>
 
-                li.innerHTML =
-                    `${i.title}
-                     <button onclick="downloadInstruction(${i.id})">
-                        Download
-                     </button>`;
+            <div id="instructions" class="row g-3"></div>
 
-                list.appendChild(li);
-            });
-        }
+        </div>
 
-        function downloadInstruction(id) {
-            window.location =
-                `/api/instruction/download?instructionId=${id}`;
-        }
-
-        loadInstructions();
-    </script>
+    </div>
+</div>
+<script src="script.js"></script>
 </body>
 </html>

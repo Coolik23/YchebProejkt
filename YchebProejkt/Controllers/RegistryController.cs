@@ -19,9 +19,9 @@ namespace YchebProejkt.Controllers
 
         // GET: api/<RegistryController>
         [HttpGet]
-        public IEnumerable<Registry> Get()
+        public IActionResult GetRegistries()
         {
-            return _db.Registries;
+            return Ok(_db.Registries.ToList());
         }
 
 
@@ -37,7 +37,7 @@ namespace YchebProejkt.Controllers
 
         // POST api/<RegistryController>
         [HttpPost]
-        public void Post(CreateRegistryDto dto)
+        public IActionResult Post([FromForm] CreateRegistryDto dto)
         {
             var registry = new Registry
             {
@@ -47,6 +47,8 @@ namespace YchebProejkt.Controllers
 
             _db.Registries.Add(registry);
             _db.SaveChanges();
+
+            return Ok(registry);
         }
 
 
